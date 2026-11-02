@@ -1,77 +1,144 @@
-**Program:** BSc in Software Engineering
+ # ROS 2 – Introduction to Robotics and Intelligent Systems (Lab 1)
 
-**Course:** Introduction to Robotics and Intelligent Systems
+## Course Information
 
-**Lecturer:** Mohammed Sraj (MSc AI)
+- **Course:** Introduction to Robotics and Intelligent Systems
+- **Institution:** Addis Ababa University (AAU)
+- **School:** School of Information Technology and Engineering (SiTE)
+- **Academic Year:** 2026
+- **Lab Assistant:** Mohammed Sraj
 
-**Lab Assistant:** Mohammed Sraj (MSc AI)
+## Project Overview
 
-**Academic year:** 2026
+This project implements Lab 1 using **ROS 2 Humble** and **Gazebo Harmonic**. It focuses on developing a differential-drive robot that can use sensors, detect obstacles, communicate through ROS 2 topics and services, and perform movements using actions.
 
-# Lab 1: ROS 2 and Custom Robot Simulation
+## Implemented Features
 
-Lab material for the first lab session of **Introduction to Robotics and Intelligent Systems**, a
-course in the BSc in Software Engineering at the School of Information Technology and Engineering
-(SiTE), Addis Ababa Institute of Technology, Addis Ababa University.
+### 1. Sensors
+- Added a depth camera to the robot.
+- Added an IMU sensor.
+- Configured ROS 2 topics to publish sensor data.
 
-## What the session covers
+### 2. Obstacle Detection
+- Created an obstacle detector node that subscribes to laser scan data.
+- Publishes obstacle information using a custom ROS 2 message.
+- Implemented a `turn_away` node that moves forward when the path is clear and turns when an obstacle is detected.
 
-The session takes you from the basic ideas of ROS 2 to a simulated robot that you program yourself. It
-has three parts.
+### 3. ROS 2 Parameters
+- Added configurable parameters for forward and turning speeds.
+- Used parameters to control the robot's movement.
 
-1. **ROS 2 concepts on turtlesim.** You work through the official ROS 2 beginner tutorials, on the
-   command line tools and on the client libraries, using turtlesim as the tutorials do. This part
-   introduces nodes, topics, services, parameters, actions, launch files, workspaces and packages.
-   Use the Python version of each tutorial. The tutorials are listed on the ROS 2 documentation site
-   for [Humble](https://docs.ros.org/en/humble/Tutorials.html), the ROS 2 version this course uses.
-2. **A robot of your own in Gazebo.** You build the packages in this folder and follow the
-   [diffdrive_bot README](diffdrive_bot/README.md). It shows the same ideas on a robot model: a URDF
-   description, simulation in Gazebo, the TF tree, and Python nodes that talk to each other with a
-   custom message, a service and an action.
-3. **Exercise.** In a project folder of your own, with your copy of the lab packages, you add a
-   depth camera and an IMU to the robot's URDF, then write your own packages for the robot, from a
-   simple node up to an action client. You hand in this folder as a GitHub repository. The tasks are
-   in [EXERCISE.md](EXERCISE.md).
+### 4. Custom Messages
+- Created a custom `RobotStatus.msg` message.
+- Publishes the robot's current state and obstacle distance.
 
-By the end of the session you should be able to create a ROS 2 workspace and packages, describe a
-robot in URDF and simulate it in Gazebo, inspect a running system with the `ros2` tools, RViz and the
-TF tools, and write Python nodes that use topics, parameters, services and actions with interface
-types of your own.
+### 5. ROS 2 Services
+- Implemented services to activate or deactivate the robot.
+- Added a service to change the robot's speed.
 
-## What is in this folder
+### 6. ROS 2 Actions
+- Created a `Rotate.action` interface.
+- Implemented an action server to rotate the robot by a requested angle.
+- Tested the rotation action successfully.
 
-| Package | What it is |
-|---------|------------|
-| [diffdrive_bot](diffdrive_bot) | A two-wheeled differential-drive robot with a lidar and a camera, the Gazebo world it drives in, launch files for RViz and Gazebo, and the Python nodes that drive it |
-| [lab_interfaces](lab_interfaces) | The message, service and action types the nodes use: `ObstacleInfo.msg`, `SetSpeed.srv` and `DriveDistance.action` |
+### 7. Action Client – Square Movement
+- Created a `square_driver` action client.
+- The robot drives four 1-metre sides and performs 90-degree turns.
+- Successfully tested the square movement.
 
-The interface types have a package of their own, as is usual in ROS 2, so that any package, including
-the ones you write in the exercise, can use them.
+## Project Structure
+
+```text
+lab1_exercise/
+├── diffdrive_bot/
+│   ├── config/
+│   ├── launch/
+│   ├── rviz/
+│   ├── scripts/
+│   ├── urdf/
+│   └── worlds/
+│
+├── lab_interfaces/
+│   ├── action/
+│   ├── msg/
+│   └── srv/
+│
+├── my_robot_interfaces/
+│
+└── my_robot_nodes/
+    └── my_robot_nodes/
+        ├── turn_away.py
+        ├── rotate_action_server.py
+        └── square_driver.py
+```
 
 ## Requirements
 
-- Ubuntu 22.04 with ROS 2 Humble
-- Gazebo Harmonic with its ROS 2 packages (`ros-humble-ros-gzharmonic`)
+- Ubuntu 22.04
+- ROS 2 Humble
+- Gazebo Harmonic
+- Python 3
 
-The [diffdrive_bot README](diffdrive_bot/README.md) lists the packages to install and how.
+## Build Instructions
 
-## Getting started
+Open a terminal inside the ROS 2 environment and run:
 
-First install the packages listed under "What you need" in the
-[diffdrive_bot README](diffdrive_bot/README.md#what-you-need). Then clone the repository into the
-`src` folder of a ROS 2 workspace and build this lab's packages:
+```bash
+cd ~/ros2_ws
+colcon build --packages-up-to my_robot_nodes --symlink-install
+```
+
+Source the workspace:
 
 ```bash
 source /opt/ros/humble/setup.bash
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
-git clone https://github.com/berito/intro_robotics_intelligent_systems_labs.git
-cd ~/ros2_ws
-colcon build --symlink-install --packages-up-to diffdrive_bot
-source install/setup.bash
+source ~/ros2_ws/install/setup.bash
 ```
 
-Then continue with Step 2 of the [diffdrive_bot README](diffdrive_bot/README.md).
+## Running the Simulation
 
-## License
+Launch the Gazebo simulation:
 
-The packages are released under the MIT license; see [LICENSE](../LICENSE).
+```bash
+ros2 launch diffdrive_bot gazebo_headless.launch.py
+```
+
+Run the required nodes in separate terminals:
+
+```bash
+ros2 run diffdrive_bot obstacle_detector.py
+```
+
+```bash
+ros2 run diffdrive_bot drive_distance_server.py
+```
+
+```bash
+ros2 run my_robot_nodes rotate_action_server
+```
+
+To test the square movement:
+
+```bash
+ros2 run my_robot_nodes square_driver
+```
+
+## Testing Results
+
+The following functionalities were tested:
+
+- Gazebo simulation launched successfully.
+- Depth camera and IMU topics published sensor data.
+- Obstacle detection and custom message publishing were tested.
+- ROS 2 parameters and services were tested.
+- The rotation action server completed a rotation goal successfully.
+- The square movement test completed successfully, with the robot driving four 1-metre sides and making 90-degree turns.
+
+**Note:** Sensor publishing rates may be lower than the configured rates when running the simulation in a Docker/WSL environment.
+
+## Author
+
+**Sosina Zemichael**
+
+Addis Ababa University  
+Software Engineering Student
